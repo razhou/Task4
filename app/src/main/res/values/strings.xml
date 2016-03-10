@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Task4</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_transaction">Transaction</string>
+    <string name="title_activity_sinkron">Sinkron</string>
+    <string name="title_activity_main2">Main2Activity</string>
+</resources>
