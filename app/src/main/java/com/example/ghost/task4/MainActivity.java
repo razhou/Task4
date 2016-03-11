@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity
         ArrayList<HashMap<String, String>> ListExp =  DB.getAllUsersEXP();
         ArrayList<HashMap<String, String>> ListInc =  DB.getAllUsersInc();
         HashMap<String, String> Te = DB.totalEXP();
+        HashMap<String, String> Ti= DB.totalInc();
+        HashMap<String, Integer> Bal =  DB.balance();
 
         if(ListExp.size()!=0){
 
@@ -72,6 +74,14 @@ public class MainActivity extends AppCompatActivity
         String toE = Te.get("total_exp");
 
         totalExp.setText(toE);
+
+        TextView totalInc = (TextView)findViewById(R.id.txtTotAmntInc);
+        String toI = Ti.get("total_inc");
+        totalInc.setText(toI);
+
+        TextView balance = (TextView)findViewById(R.id.txtBalance);
+        int blnc = Bal.get("balance");
+        balance.setText(String.valueOf(blnc));
 
 
 

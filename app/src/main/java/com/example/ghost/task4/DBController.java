@@ -5,9 +5,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * Created by ghost on 10/03/2016.
@@ -89,27 +93,72 @@ public class DBController extends SQLiteOpenHelper {
     }
 
 
-   public HashMap<String, String>totalEXP(){
-       HashMap<String, String> Ltot;
-       Ltot = new HashMap<String, String>();
-       String selectQuery = "SELECT sum (" + COL3_EXP + ") FROM " + TABLE_EXP;
+   public HashMap<String, String>totalInc(){
+       HashMap<String, String> LtotInc;
+       LtotInc = new HashMap<String, String>();
+       String selectQuery = "SELECT sum (" + COL3_INC + ") FROM " + TABLE_INC;
        SQLiteDatabase data = this.getWritableDatabase();
        Cursor cursor = data.rawQuery(selectQuery, null);
-       int tot_exp;
+       int tot_inc;
        if(cursor.moveToFirst()) {
-           tot_exp = cursor.getInt(0);
-           Ltot.put("total_exp", String.valueOf(tot_exp));
+           tot_inc = cursor.getInt(0);
+           LtotInc.put("total_inc", String.valueOf(tot_inc));
        }
        else {
-           tot_exp = 0;
-           Ltot.put("total_exp", String.valueOf(tot_exp));
+           tot_inc = 0;
+           LtotInc.put("total_inc", String.valueOf(tot_inc));
        }
 
        cursor.close();
 
-        return Ltot;
+        return LtotInc;
 
    }
+
+    public HashMap<String, String>totalEXP(){
+        HashMap<String, String> Ltot;
+        Ltot = new HashMap<String, String>();
+        String selectQuery = "SELECT sum (" + COL3_EXP + ") FROM " + TABLE_EXP;
+        SQLiteDatabase data = this.getWritableDatabase();
+        Cursor cursor = data.rawQuery(selectQuery, null);
+        int tot_exp;
+        if(cursor.moveToFirst()) {
+            tot_exp = cursor.getInt(0);
+            Ltot.put("total_exp", String.valueOf(tot_exp));
+        }
+        else {
+            tot_exp = 0;
+            Ltot.put("total_exp", String.valueOf(tot_exp));
+        }
+
+        cursor.close();
+
+        return Ltot;
+
+    }
+
+    public HashMap<String,Integer>balance(){
+        HashMap<String, Integer> LBal;
+        LBal = new HashMap<String, Integer>();
+        String selectQuery = "SELECT sum(AMT_INC) -  sum(AMT_EXP ) FROM income,expense  ";
+        SQLiteDatabase data = this.getWritableDatabase();
+        Cursor cursor = data.rawQuery(selectQuery, null);
+        int bal;
+        if(cursor.moveToFirst()) {
+            bal = cursor.getInt(0);
+            LBal.put("balance", bal);
+        }
+        else {
+            bal = 0;
+            LBal.put("balance", bal);
+        }
+
+        cursor.close();
+
+        return LBal;
+    }
+
+
 
 
     public boolean save_income(String desc_inc, Integer amt_inc){
@@ -166,5 +215,43 @@ public class DBController extends SQLiteOpenHelper {
     }
 
 
+    public String composeJSONfromSQLite(){
+        ArrayList<HashMap<String, String>> wordList;
+        wordList = new ArrayList<HashMap<String, String>>();
+        String selectQuery = "SELECT  * FROM expense";
+        SQLiteDatabase database = this.getWritableDatabase();
+        Cursor cursor = database.rawQuery(selectQuery, null);
+        if (cursor.moveToFirst()) {
+            do {
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("id", cursor.getString(0));
+                map.put("desc_exp", cursor.getString(1));
+                map.put("amt_exp",cursor.getString(2));
+                wordList.add(map);
+            } while (cursor.moveToNext());
+        }
+        database.close();
+        Gson gson = new GsonBuilder().create();
+        //Use GSON to serialize Array List to JSON
+        return gson.toJson(wordList);
+    }
+
+    public int dbSyncCount(){
+        int count = 0;
+        String selectQuery = "SELECT  * FROM expense";
+        SQLiteDatabase database = this.getWritableDatabase();
+        Cursor cursor = database.rawQuery(selectQuery, null);
+        count = cursor.getCount();
+        database.close();
+        return count;
+    }
+
+    public void updateSyncStatus(String id, String desc){
+        SQLiteDatabase database = this.getWritableDatabase();
+        String updateQuery = "Update exepense set DESC_EXP = '"+ desc +"' where ID_EXP="+"'"+ id +"'";
+        Log.d("query", updateQuery);
+        database.execSQL(updateQuery);
+        database.close();
+    }
 
 }

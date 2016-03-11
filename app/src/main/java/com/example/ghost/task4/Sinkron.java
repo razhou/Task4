@@ -1,5 +1,6 @@
 package com.example.ghost.task4;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -13,9 +14,27 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import cz.msebera.android.httpclient.Header;
+
 
 public class Sinkron extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    DBController controller = new DBController(this);
+
+    ProgressDialog prgDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +42,10 @@ public class Sinkron extends AppCompatActivity
         setContentView(R.layout.activity_sinkron);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+
+
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -96,5 +119,64 @@ public class Sinkron extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+
+
+    public void syncSQLiteMySQLDB() {
+
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        ArrayList<HashMap<String, String>> userList = controller.getAllUsersEXP();
+        if (userList.size() != 0) {
+            if (controller.dbSyncCount() != 0) {
+                prgDialog.show();
+                params.put("usersJSON", controller.composeJSONfromSQLite());
+                client.post("http://private-69e82-andro.apiary-mock.com/expen/",params ,new AsyncHttpResponseHandler() {
+                    @Override
+                    public void onSuccess(String responseBody) {
+                        System.out.println(responseBody);
+                        prgDialog.hide();
+                        try {
+                            JSONArray arr = new JSONArray(responseBody);
+                            System.out.println(arr.length());
+                            for (int i = 0; i < arr.length(); i++) {
+                                JSONObject obj = (JSONObject) arr.get(i);
+                                System.out.println(obj.get("id"));
+                                System.out.println(obj.get("description"));
+                                controller.updateSyncStatus(obj.get("id").toString(), obj.get("description").toString());
+                            }
+                            Toast.makeText(getApplicationContext(), "DB Sync completed!", Toast.LENGTH_LONG).show();
+                        } catch (JSONException e) {
+
+                            Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                            e.printStackTrace();
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                         {
+
+                            prgDialog.hide();
+                            if (statusCode == 404) {
+                                Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                            } else if (statusCode == 500) {
+                                Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet]", Toast.LENGTH_LONG).show();
+                            }
+
+                    }
+
+                    }
+                });
+            } else {
+                Toast.makeText(getApplicationContext(), "SQLite and Remote MySQL DBs are in Sync!", Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), "No data in SQLite DB, please do enter User name to perform Sync action", Toast.LENGTH_LONG).show();
+        }
     }
 }
