@@ -27,5 +27,5 @@
             android:label="@string/title_activity_sinkron"
             android:theme="@style/AppTheme.NoActionBar" />
     </application>
-
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

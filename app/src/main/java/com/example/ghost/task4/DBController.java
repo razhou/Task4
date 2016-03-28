@@ -22,11 +22,11 @@ public class DBController extends SQLiteOpenHelper {
     public static final String DATABASE_NAME="Task4.db";
     public static final String TABLE_EXP="expense";
     public static final String TABLE_INC ="income";
-    public static final String COL1_EXP="ID_EXP";
+    public static final String COL1_EXP="ID";
     public static final String COL2_EXP="DESC_EXP";
     public static final String COL3_EXP="AMT_EXP";
     public static final String COL4_EXP="TOT_EXP";
-    public static final String COL1_INC="ID_INC";
+    public static final String COL1_INC="ID";
     public static final String COL2_INC="DESC_INC";
     public static final String COL3_INC="AMT_INC";
     public static final String COL4_INC="TOT_INC";
@@ -37,9 +37,7 @@ public class DBController extends SQLiteOpenHelper {
 
                                 +COL2_EXP+" TEXT,"
 
-                                +COL3_EXP+" INTEGER, "
-
-                                +COL4_EXP+" INTEGER );";
+                                +COL3_EXP+" TEXT );";
 
 
     public  static final  String TABLE_CREATE_INC = "CREATE TABLE "+TABLE_INC+" ( "
@@ -47,9 +45,7 @@ public class DBController extends SQLiteOpenHelper {
 
                                 +COL2_INC+ " TEXT, "
 
-                                +COL3_INC+ " INTEGER "
-
-                                +COL4_INC+" INTEGER );";;
+                                +COL3_INC+ " TEXT );";
 
 
     public DBController(Context context){
@@ -215,43 +211,23 @@ public class DBController extends SQLiteOpenHelper {
     }
 
 
-    public String composeJSONfromSQLite(){
-        ArrayList<HashMap<String, String>> wordList;
-        wordList = new ArrayList<HashMap<String, String>>();
-        String selectQuery = "SELECT  * FROM expense";
-        SQLiteDatabase database = this.getWritableDatabase();
-        Cursor cursor = database.rawQuery(selectQuery, null);
-        if (cursor.moveToFirst()) {
-            do {
-                HashMap<String, String> map = new HashMap<String, String>();
-                map.put("id", cursor.getString(0));
-                map.put("desc_exp", cursor.getString(1));
-                map.put("amt_exp",cursor.getString(2));
-                wordList.add(map);
-            } while (cursor.moveToNext());
-        }
-        database.close();
-        Gson gson = new GsonBuilder().create();
-        //Use GSON to serialize Array List to JSON
-        return gson.toJson(wordList);
+    public Cursor list_expenses() {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor expense = db.rawQuery("SELECT "+COL1_EXP+" as id, "+COL2_EXP+" , "+COL3_EXP+" FROM " + TABLE_EXP, null);
+        return expense;
+
+
     }
 
-    public int dbSyncCount(){
-        int count = 0;
-        String selectQuery = "SELECT  * FROM expense";
-        SQLiteDatabase database = this.getWritableDatabase();
-        Cursor cursor = database.rawQuery(selectQuery, null);
-        count = cursor.getCount();
-        database.close();
-        return count;
-    }
+    public Cursor list_income() {
 
-    public void updateSyncStatus(String id, String desc){
-        SQLiteDatabase database = this.getWritableDatabase();
-        String updateQuery = "Update exepense set DESC_EXP = '"+ desc +"' where ID_EXP="+"'"+ id +"'";
-        Log.d("query", updateQuery);
-        database.execSQL(updateQuery);
-        database.close();
-    }
+        SQLiteDatabase db = this.getWritableDatabase();
 
+        Cursor income = db.rawQuery("SELECT "+COL1_INC+" as id, "+COL2_INC+" , "+COL3_INC+" FROM " + TABLE_INC, null);
+
+        return income;
+
+    }
 }

@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -56,6 +57,13 @@ public class MainActivity extends AppCompatActivity
             ListAdapter adapter = new SimpleAdapter( MainActivity.this,ListExp, R.layout.listviewexp, new String[] { "DESC_EXP","AMT_EXP"}, new int[] {R.id.desc, R.id.amt});
             ListView myList=(ListView)findViewById(R.id.lv_Exp);
             myList.setAdapter(adapter);
+
+            myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                }
+            });
 
 
         }

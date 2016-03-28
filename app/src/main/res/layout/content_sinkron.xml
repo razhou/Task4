@@ -12,14 +12,13 @@
     tools:context="com.example.ghost.task4.Sinkron"
     tools:showIn="@layout/app_bar_sinkron">
 
-    <TextView
+
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Ini Sinkron"
-        android:id="@+id/textView3"
+        android:text="Synchronize"
+        android:id="@+id/btnSin"
         android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="98dp" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="169dp" />
 </RelativeLayout>
